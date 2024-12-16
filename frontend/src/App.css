@@ -1,0 +1,88 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #74ebd5, #acb6e5);
+  color: #333;
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-container {
+  background: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  padding: 40px;
+  width: 90%;
+  max-width: 500px;
+}
+
+.title {
+  font-size: 2.5rem;
+  color: #4a90e2;
+  margin-bottom: 20px;
+}
+
+.upload-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.file-input {
+  border: 2px dashed #4a90e2;
+  padding: 10px;
+  width: 100%;
+  border-radius: 10px;
+  outline: none;
+  margin-bottom: 20px;
+  font-size: 1rem;
+}
+
+.file-input:hover {
+  border-color: #6aa8e3;
+}
+
+.predict-button {
+  background: #4a90e2;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.predict-button:hover {
+  background: #357ab8;
+}
+
+.result-container {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.result {
+  font-size: 1.5rem;
+  color: #4a90e2;
+}
+
+.speak-button {
+  background: #ff5e57;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin-top: 10px;
+}
+
+.speak-button:hover {
+  background: #d84c48;
+}
