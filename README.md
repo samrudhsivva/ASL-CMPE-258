@@ -1,6 +1,6 @@
 # ASL-CMPE-258
 
-# Proposal: Deep Learning Application for Real-Time Recognition of American Sign Language (ASL) Gestures
+# Proposal: Deep Learning-Powered ASL Recognition with Multilingual and Adaptive Feedback Features
 
 ## Team Members:
 
