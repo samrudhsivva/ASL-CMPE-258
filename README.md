@@ -104,13 +104,15 @@ The system integrates the following key components:
 5. **Testing:**
    - Evaluate the system under varying lighting and background conditions to ensure reliability.
 
-## Anticipated Outcomes:
+## Outcomes:
 
 1. Achieve high accuracy (~99.6%) in recognizing ASL gestures.
 2. Deliver a seamless real-time experience through the React-based UI.
 3. Provide multilingual feedback to enhance inclusivity.
 4. Establish a feedback mechanism for continuous model improvement.
 5. Ensure cost-efficient operation leveraging EfficientNet-B0 and open-source tools.
+
+<img width="544" alt="Screenshot 2024-12-15 at 8 53 11 PM" src="https://github.com/user-attachments/assets/326e8459-7710-4ac3-aca0-02445dc938e9" />
 
 ## Future Enhancements:
 
@@ -125,7 +127,7 @@ The system integrates the following key components:
 - **React.js:** Used for building the frontend interface.
 
 
-<img width="544" alt="Screenshot 2024-12-15 at 8 53 11 PM" src="https://github.com/user-attachments/assets/326e8459-7710-4ac3-aca0-02445dc938e9" />
+
 
 
 
