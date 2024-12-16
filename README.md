@@ -104,13 +104,6 @@ The system integrates the following key components:
 5. **Testing:**
    - Evaluate the system under varying lighting and background conditions to ensure reliability.
 
-
-## Comparision
-
-![Screenshot 2024-12-15 at 9 22 10 PM](https://github.com/user-attachments/assets/8035fe7d-d322-463c-94f8-82cc8175e3de)
-
-   
-
 ## Outcomes:
 
 1. Achieve high accuracy (~99.6%) in recognizing ASL gestures.
@@ -119,7 +112,15 @@ The system integrates the following key components:
 4. Establish a feedback mechanism for continuous model improvement.
 5. Ensure cost-efficient operation leveraging EfficientNet-B0 and open-source tools.
 
+## Task Distribution:
+
 <img width="544" alt="Screenshot 2024-12-15 at 8 53 11 PM" src="https://github.com/user-attachments/assets/326e8459-7710-4ac3-aca0-02445dc938e9" />
+
+## UI Output:
+
+<img width="1470" alt="Screenshot 2024-12-12 at 1 49 45 PM" src="https://github.com/user-attachments/assets/cb601029-3099-4c9b-b4d3-58f046c47da9" />
+
+
 
 ## Future Enhancements:
 
@@ -129,7 +130,12 @@ The system integrates the following key components:
 
 ## References:
 
+- **ASL Alphabet Dataset:** Kaggle
+- **EfficientNet-B0 Architecture:** TensorFlow and PyTorch GitHub repositories
+- **React.js:** Used for building the frontend interface.
 
-<img width="406" alt="Screenshot 2024-12-15 at 9 30 07 PM" src="https://github.com/user-attachments/assets/f5d81dbb-46b2-45bd-88d9-061640886bd4" />
+
+
+
 
 
