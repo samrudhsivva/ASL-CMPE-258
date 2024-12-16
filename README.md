@@ -104,6 +104,13 @@ The system integrates the following key components:
 5. **Testing:**
    - Evaluate the system under varying lighting and background conditions to ensure reliability.
 
+
+## Comparision
+
+![Screenshot 2024-12-15 at 9 22 10 PM](https://github.com/user-attachments/assets/8035fe7d-d322-463c-94f8-82cc8175e3de)
+
+   
+
 ## Outcomes:
 
 1. Achieve high accuracy (~99.6%) in recognizing ASL gestures.
