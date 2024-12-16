@@ -120,6 +120,11 @@ The system integrates the following key components:
 
 <img width="1470" alt="Screenshot 2024-12-12 at 1 49 45 PM" src="https://github.com/user-attachments/assets/cb601029-3099-4c9b-b4d3-58f046c47da9" />
 
+## Comparision:
+
+
+![Screenshot 2024-12-15 at 9 22 10 PM](https://github.com/user-attachments/assets/61eea04a-18eb-429e-925e-7fc6bc429f52)
+
 
 
 ## Future Enhancements:
@@ -130,9 +135,8 @@ The system integrates the following key components:
 
 ## References:
 
-- **ASL Alphabet Dataset:** Kaggle
-- **EfficientNet-B0 Architecture:** TensorFlow and PyTorch GitHub repositories
-- **React.js:** Used for building the frontend interface.
+
+<img width="406" alt="Screenshot 2024-12-15 at 9 30 07 PM" src="https://github.com/user-attachments/assets/e41d27c1-42c8-4a23-b44b-bbd24bc58189" />
 
 
 
