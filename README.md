@@ -125,4 +125,7 @@ The system integrates the following key components:
 - **React.js:** Used for building the frontend interface.
 
 
+<img width="544" alt="Screenshot 2024-12-15 at 8 53 11 PM" src="https://github.com/user-attachments/assets/326e8459-7710-4ac3-aca0-02445dc938e9" />
+
+
 
