@@ -10,7 +10,8 @@ const App = () => {
   const [translatedWord, setTranslatedWord] = useState(""); // Translated word
   const { speak } = useSpeechSynthesis();
 
-  const handleImageUpload = (event) => {
+  // Handles image upload and triggers prediction by sending the image to the backend
+const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
       setSelectedImage(file);
@@ -18,7 +19,8 @@ const App = () => {
     }
   };
 
-  const handlePredict = async (image) => {
+  // Sends the uploaded image to the backend and retrieves the predicted alphabet
+const handlePredict = async (image) => {
     try {
       const formData = new FormData();
       formData.append("image", image);
@@ -40,7 +42,8 @@ const App = () => {
     }
   };
 
-  const callOutAlphabet = (text) => {
+  // Uses the speech synthesis API to vocalize the predicted alphabet in the selected language
+const callOutAlphabet = (text) => {
     const voices = window.speechSynthesis.getVoices();
     const languageMap = {
       en: "en-US",
@@ -61,11 +64,13 @@ const App = () => {
     setLanguage(event.target.value);
   };
 
-  const handleRecordIn = () => {
+  // Appends the predicted alphabet to the recorded word
+const handleRecordIn = () => {
     setRecordedWord((prevWord) => prevWord + predictedAlphabet);
   };
 
-  const handleRecordOut = async () => {
+  // Translates the recorded word into the selected language and vocalizes the translation
+const handleRecordOut = async () => {
     if (recordedWord) {
       const translated = await translateWord(recordedWord, language);
       setTranslatedWord(translated);
@@ -74,12 +79,14 @@ const App = () => {
     }
   };
 
-  const handleReset = () => {
+  // Resets the recorded and translated words
+const handleReset = () => {
     setRecordedWord(""); // Clear the recorded word
     setTranslatedWord(""); // Clear the translated word
   };
 
-  const translateWord = async (word, targetLang) => {
+  // Sends the recorded word to the backend for translation into the selected language
+const translateWord = async (word, targetLang) => {
     try {
       const response = await fetch("http://127.0.0.1:5000/translate", {
         method: "POST",
