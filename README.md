@@ -161,3 +161,22 @@ pyttsx3 Documentation: https://pyttsx3.readthedocs.io/en/latest/
 
 FastAPI Documentation: https://fastapi.tiangolo.com/
 
+AdamW Optimizer:
+Paper: Decoupled Weight Decay Regularization by Ilya Loshchilov and Frank Hutter.
+Link: https://arxiv.org/abs/1711.05101
+PyTorch Documentation: https://pytorch.org/docs/stable/optim.html#torch.optim.AdamW
+
+Cross-Entropy Loss:
+PyTorch Documentation: https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html
+
+Data Augmentation:
+Techniques used: Random Horizontal Flip, Color Jitter, and Normalization.
+Reference: AutoAugment: Learning Augmentation Policies from Data by Ekin D. Cubuk et al.
+Link: https://arxiv.org/abs/1805.09501
+
+TQDM for Progress Visualization:
+TQDM Documentation: https://tqdm.github.io/
+
+
+
+
