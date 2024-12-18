@@ -214,7 +214,7 @@ async def root():
 | Word Recognition and Translation Integration | Implementing the word recognition algorithm and integrating with multilingual translation APIs.      | Sai Prasad Shivaratri |
 | Frontend Interface Development               | Creating a React-based interface to display gestures, recognized words, and translations in real-time.| Samrudh Sivva       |
 | Testing and Evaluation                       | Conducting system reliability tests under different conditions and iteratively improving performance. | Nithin Aleti          |
-| GitHub Repository Setup and Management       | Setting up, maintaining, and documenting the project repository for seamless team collaboration.     | All Members           |
+| GitHub Repository Setup and Management       | Setting up, maintaining, and documenting the project repository for seamless team collaboration.     | Samrudh Sivva           |
 | Team Collaboration and Progress Tracking     | Organizing team meetings, tracking milestones, and ensuring timely completion of tasks.             | All Members           |
 
 ## UI Output:
