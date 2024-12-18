@@ -1,62 +1,185 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useSpeechSynthesis } from "react-speech-kit";
 import "./App.css";
 
-function App() {
-  const [image, setImage] = useState(null);
-  const [result, setResult] = useState("");
+const App = () => {
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [predictedAlphabet, setPredictedAlphabet] = useState("");
+  const [language, setLanguage] = useState("en"); // Default: English
+  const [recordedWord, setRecordedWord] = useState(""); // Word being formed
+  const [translatedWord, setTranslatedWord] = useState(""); // Translated word
   const { speak } = useSpeechSynthesis();
 
-  const handleImageChange = (e) => {
-    setImage(e.target.files[0]);
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedImage(file);
+      handlePredict(file);
+    }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!image) {
-      alert("Please upload an image first!");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", image);
-
+  const handlePredict = async (image) => {
     try {
-      const response = await axios.post("http://127.0.0.1:8000/predict", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      const formData = new FormData();
+      formData.append("image", image);
+
+      const response = await fetch("http://127.0.0.1:5000/predict", {
+        method: "POST",
+        body: formData,
       });
-      setResult(response.data.predicted_label);
+
+      if (!response.ok) {
+        throw new Error("Prediction failed");
+      }
+
+      const data = await response.json();
+      setPredictedAlphabet(data.predictedAlphabet);
+      callOutAlphabet(data.predictedAlphabet);
     } catch (error) {
-      console.error("Error:", error);
-      alert("Error predicting the image. Please try again.");
+      console.error("Error predicting alphabet:", error);
     }
   };
 
-  const handleSpeak = () => {
-    if (result) {
-      speak({ text: `The predicted sign is ${result}` });
+  const callOutAlphabet = (text) => {
+    const voices = window.speechSynthesis.getVoices();
+    const languageMap = {
+      en: "en-US",
+      es: "es-ES",
+      te: "te-IN", // Telugu (requires specific system setup for support)
+      hi: "hi-IN", // Hindi
+    };
+
+    const voice = voices.find((v) => v.lang === languageMap[language]);
+    speak({
+      text,
+      voice,
+      lang: languageMap[language],
+    });
+  };
+
+  const handleLanguageChange = (event) => {
+    setLanguage(event.target.value);
+  };
+
+  const handleRecordIn = () => {
+    setRecordedWord((prevWord) => prevWord + predictedAlphabet);
+  };
+
+  const handleRecordOut = async () => {
+    if (recordedWord) {
+      const translated = await translateWord(recordedWord, language);
+      setTranslatedWord(translated);
+      alert(`Recorded Word: ${recordedWord}\nTranslated Word: ${translated}`);
+      callOutAlphabet(translated);
     }
+  };
+
+  const handleReset = () => {
+    setRecordedWord(""); // Clear the recorded word
+    setTranslatedWord(""); // Clear the translated word
+  };
+
+  const translateWord = async (word, targetLang) => {
+    try {
+      const response = await fetch("http://127.0.0.1:5000/translate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: word,
+          target: targetLang,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Translation failed");
+      }
+
+      const data = await response.json();
+      return data.translatedText;
+    } catch (error) {
+      console.error("Error translating word:", error);
+      return word; // Fallback to original word if translation fails
+    }
+  };
+
+  const targetLangMap = {
+    en: "English",
+    es: "Spanish",
+    hi: "Hindi",
+    te: "Telugu",
+    ja: "Japanese",
+    "zh-cn": "Chinese (Simplified)",
+    "zh-tw": "Chinese (Traditional)",
+    fr: "French",
+    de: "German",
   };
 
   return (
     <div className="app-container">
-      <h1 className="title">ASL Recognition</h1>
-      
-      <form onSubmit={handleSubmit} className="upload-form">
-        <input type="file" accept="image/*" onChange={handleImageChange} className="file-input" />
-        <button type="submit" className="predict-button">Predict</button>
-      </form>
-
-      {result && (
-        <div className="result-container">
-          <h2 className="result">Predicted Sign: {result}</h2>
-          <button onClick={handleSpeak} className="speak-button">Speak</button>
-        </div>
+      <h1 className="title">Alphabet Predictor</h1>
+      <div className="team-details">
+        <p>CMPE 258 - Team 16</p>
+        <p>Samrudh Sivva</p>
+        <p>Sai Prasad Shivanatri</p>
+        <p>Nithin Aleti</p>
+      </div>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleImageUpload}
+        className="upload-button"
+      />
+      {selectedImage && (
+        <img
+          src={URL.createObjectURL(selectedImage)}
+          alt="Uploaded"
+          className="uploaded-image"
+        />
       )}
+      <div className="button-container">
+        <button
+          onClick={handleRecordIn}
+          className="record-in-button"
+          disabled={!predictedAlphabet}
+        >
+          Record In
+        </button>
+        <button onClick={handleRecordOut} className="record-out-button">
+          Record Out
+        </button>
+        <button onClick={handleReset} className="reset-button">
+          Reset
+        </button>
+        <button
+          onClick={() => alert("Feedback button pressed!")}
+          className="feedback-button"
+        >
+          Feedback
+        </button>
+      </div>
+      <h2 className="predicted-alphabet">
+        Predicted Alphabet: {predictedAlphabet}
+      </h2>
+      <h2 className="recorded-word">Recorded Word: {recordedWord}</h2>
+      <h2 className="translated-word">Translated Word: {translatedWord}</h2>
+      <label className="language-selector">
+        Language:
+        <select value={language} onChange={handleLanguageChange}>
+          <option value="en">English</option>
+          <option value="es">Spanish</option>
+          <option value="hi">Hindi</option>
+          <option value="te">Telugu</option>
+          <option value="ja">Japanese</option>
+          <option value="zh-cn">Chinese (Simplified)</option>
+          <option value="zh-tw">Chinese (Traditional)</option>
+          <option value="fr">French</option>
+          <option value="de">German</option>
+        </select>
+      </label>
     </div>
   );
-}
+};
 
 export default App;
