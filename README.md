@@ -208,8 +208,8 @@ async def root():
 
 | Task                                         | Description                                                                                         | Team Member           |
 |----------------------------------------------|-----------------------------------------------------------------------------------------------------|-----------------------|
-| Dataset Preparation                          | Preprocessing and augmentation of the ASL Alphabet dataset for model training.                     | Samrudh Sivva         |
-| Model Training and Optimization              | Training the EfficientNet-B0 model, tuning hyperparameters, and evaluating performance.             | Sai Prasad Shivaratri |
+| Dataset Preparation                          | Preprocessing and augmentation of the ASL Alphabet dataset for model training.                     | Sai Prasad         |
+| Model Training and Optimization              | Training the EfficientNet-B0 model, tuning hyperparameters, and evaluating performance.             |  Samrudh Sivva |
 | Backend Development                          | Developing REST APIs for gesture recognition and translation services using FastAPI.                | Nithin Aleti          |
 | Word Recognition and Translation Integration | Implementing the word recognition algorithm and integrating with multilingual translation APIs.      | Sai Prasad Shivaratri |
 | Frontend Interface Development               | Creating a React-based interface to display gestures, recognized words, and translations in real-time.| Samrudh Sivva       |
@@ -218,12 +218,21 @@ async def root():
 | Team Collaboration and Progress Tracking     | Organizing team meetings, tracking milestones, and ensuring timely completion of tasks.             | All Members           |
 
 ## UI Output:
+<img width="1470" alt="Screenshot 2024-12-18 at 12 32 34 AM" src="https://github.com/user-attachments/assets/f03a4c82-9d41-4cee-b096-afa89f2530a6" />
+
+<img width="1470" alt="Screenshot 2024-12-18 at 12 29 55 AM" src="https://github.com/user-attachments/assets/348dd027-c65e-4c2d-87e7-7c52dd5bfdf6" />
+
 
 ## Comparison:
+<img width="596" alt="Screenshot 2024-12-18 at 12 21 48 AM" src="https://github.com/user-attachments/assets/c3967667-86e0-4d56-ba9f-38249a301d57" />
+<img width="774" alt="Screenshot 2024-12-18 at 12 21 55 AM" src="https://github.com/user-attachments/assets/96405f2f-22eb-4d77-94de-a4b2eb92fbc4" />
+
+
 
 ## Future Enhancements:
 
 - Expand to include dynamic gesture recognition using video sequences.
+- Improve the Feedback Component
 - Optimize for cloud-based scalability and mobile deployment.
 - Introduce additional features like translation support for more than 10 languages.
 
