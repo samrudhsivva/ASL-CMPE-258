@@ -49,67 +49,106 @@ The system integrates the following key components:
 3. **Backend Deployment:** REST API for model inference and translation.
 4. **Frontend Interface:** React-based UI for gesture display, word recognition, multilingual translation, and user feedback.
 
-### Workflow:
-
-- **Dataset Preparation:**
-
-  - Split dataset into 80% training and 20% validation sets.
-  - Apply preprocessing techniques like resizing to 224x224, normalization, and augmentation (e.g., random flips, color jitter).
-
-- **Model Training:**
-
-  - Replace the classifier layer of **EfficientNet-B0** with a custom head for 26 classes.
-  - Utilize pre-trained ImageNet weights for transfer learning.
-  - Optimize training with **AdamW optimizer** and **CrossEntropyLoss**.
-
-- **Word Recognition and Translation:**
-
-  - Record ASL gestures sequentially to construct words.
-  - Use a backend service to recognize the word from the sequence.
-  - Translate the recognized word into over five languages using a multilingual translation API (e.g., Google Translate API).
-
-- **Inference and UI Integration:**
-
-  - Real-time predictions served via a REST API.
-  - React-based UI displays recognized gestures, constructs words, and provides multilingual text-to-speech feedback.
-  - Feedback loop to allow users to submit corrections for unrecognized gestures or words.
-
-## Model Selection:
-
-**EfficientNet-B0** is proposed for its optimal balance of accuracy and computational efficiency:
-
-- **Baseline CNN:** Achieved lower accuracy (~91%).
-- **ResNet-18:** Provided better accuracy (~96%) but required more computational resources.
-- **EfficientNet-B0:** Achieved ~99.6% accuracy with reduced resource consumption, making it ideal for real-time applications.
-
-### Code for Model Selection:
+### Backend Code:
 
 ```python
-import tensorflow as tf
-from tensorflow.keras.applications import EfficientNetB0
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Flatten, Dropout
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+import torch
+from torchvision import transforms
+from PIL import Image
+import pyttsx3  # For text-to-speech
+from googletrans import Translator
 
-# Load pre-trained EfficientNetB0 model
-base_model = EfficientNetB0(include_top=False, input_shape=(224, 224, 3), weights="imagenet")
-base_model.trainable = False
+# Initialize FastAPI app
+app = FastAPI()
 
-# Build the model
-model = Sequential([
-    base_model,
-    Flatten(),
-    Dense(128, activation='relu'),
-    Dropout(0.5),
-    Dense(26, activation='softmax')
+# Enable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Define device
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# Define class labels (A-Z + 'space')
+labels = [chr(i) for i in range(65, 91)] + ['space']
+
+# Define transformations
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
 
-# Compile the model
-model.compile(optimizer=tf.keras.optimizers.AdamW(learning_rate=0.001),
-              loss='categorical_crossentropy',
-              metrics=['accuracy'])
+# Define the ASL classifier model
+class ASLClassifier(torch.nn.Module):
+    def __init__(self, num_classes):
+        super(ASLClassifier, self).__init__()
+        self.base_model = torch.hub.load('rwightman/gen-efficientnet-pytorch', 'efficientnet_b0', pretrained=True)
+        in_features = self.base_model.classifier.in_features
+        self.base_model.classifier = torch.nn.Linear(in_features, num_classes)
 
-# Summary of the model
-model.summary()
+    def forward(self, x):
+        return self.base_model(x)
+
+# Initialize and load model
+model = ASLClassifier(num_classes=len(labels)).to(device)
+model.load_state_dict(torch.load("asl_classifier.pth", map_location=device))
+model.eval()
+
+# Initialize Google Translator
+translator = Translator()
+
+# Text-to-Speech Function
+def speak_text(text):
+    engine = pyttsx3.init()
+    engine.say(text)
+    engine.runAndWait()
+
+# API Endpoint for Prediction
+@app.post("/predict")
+async def predict(file: UploadFile = File(...)):
+    try:
+        image = Image.open(file.file).convert("RGB")
+        image = transform(image).unsqueeze(0).to(device)
+
+        with torch.no_grad():
+            outputs = model(image)
+            _, predicted = torch.max(outputs, 1)
+            predicted_label = labels[predicted.item()]
+
+        speak_text(f"The predicted sign is {predicted_label}")
+        return JSONResponse({"predicted_label": predicted_label})
+
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+# API Endpoint for Translation
+@app.post("/translate")
+async def translate(request: dict):
+    try:
+        text = request.get("text", "")
+        target_language = request.get("target", "en")
+
+        if not text:
+            raise HTTPException(status_code=400, detail="Text for translation is required")
+
+        translation = translator.translate(text, dest=target_language)
+        return JSONResponse({"translatedText": translation.text})
+
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+# Root Endpoint
+@app.get("/")
+async def root():
+    return {"message": "ASL Gesture Recognition and Translation API is running."}
 ```
 
 ## Training Strategy:
@@ -145,47 +184,13 @@ model.summary()
 
 4. **Backend Development:**
 
-   - Deploy the trained model via a REST API for both single gestures and word recognition.
+   - Deploy the trained model via a REST API for both single gestures and word recognition using the provided FastAPI code.
 
 5. **Frontend Integration:**
 
    - Develop a React-based interface to display predictions and translations in real-time.
    - Enable text-to-speech feedback in multiple languages.
    - Implement a feedback loop for user corrections.
-
-### React Code for Frontend Integration:
-
-```jsx
-import React, { useState } from 'react';
-import axios from 'axios';
-
-const ASLRecognition = () => {
-  const [gesture, setGesture] = useState('');
-  const [translation, setTranslation] = useState('');
-
-  const handleRecognition = async () => {
-    try {
-      const response = await axios.post('/api/recognize', { image: "sampleImage" });
-      setGesture(response.data.gesture);
-      const translationResponse = await axios.post('/api/translate', { word: response.data.gesture });
-      setTranslation(translationResponse.data.translation);
-    } catch (error) {
-      console.error('Error recognizing or translating gesture:', error);
-    }
-  };
-
-  return (
-    <div>
-      <h1>ASL Recognition System</h1>
-      <button onClick={handleRecognition}>Recognize Gesture</button>
-      <p>Recognized Gesture: {gesture}</p>
-      <p>Translation: {translation}</p>
-    </div>
-  );
-};
-
-export default ASLRecognition;
-```
 
 6. **Testing:**
 
@@ -205,7 +210,7 @@ export default ASLRecognition;
 |----------------------------------------------|-----------------------------------------------------------------------------------------------------|-----------------------|
 | Dataset Preparation                          | Preprocessing and augmentation of the ASL Alphabet dataset for model training.                     | Samrudh Sivva         |
 | Model Training and Optimization              | Training the EfficientNet-B0 model, tuning hyperparameters, and evaluating performance.             | Sai Prasad Shivaratri |
-| Backend Development                          | Developing REST APIs for gesture recognition and translation services.                              | Nithin Aleti          |
+| Backend Development                          | Developing REST APIs for gesture recognition and translation services using FastAPI.                | Nithin Aleti          |
 | Word Recognition and Translation Integration | Implementing the word recognition algorithm and integrating with multilingual translation APIs.      | Sai Prasad Shivaratri |
 | Frontend Interface Development               | Creating a React-based interface to display gestures, recognized words, and translations in real-time.| Samrudh Sivva       |
 | Testing and Evaluation                       | Conducting system reliability tests under different conditions and iteratively improving performance. | Nithin Aleti          |
