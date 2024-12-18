@@ -46,7 +46,7 @@ The system integrates the following key components:
 
 1. **Dataset Preparation:** Data augmentation and preprocessing for enhanced generalization.
 2. **Model Training:** Fine-tuned **EfficientNet-B0** model for high performance.
-3. **Backend Deployment:** REST API for model inference and translation.
+3. **Backend Deployment:**  REST API for model inference and translation using Python Flask.
 4. **Frontend Interface:** React-based UI for gesture display, word recognition, multilingual translation, and user feedback.
 
 ### Backend Code:
