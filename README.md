@@ -218,7 +218,8 @@ async def root():
 | Team Collaboration and Progress Tracking     | Organizing team meetings, tracking milestones, and ensuring timely completion of tasks.             | All Members           |
 
 ## UI Output:
-<img width="1470" alt="Screenshot 2024-12-18 at 12 32 34 AM" src="https://github.com/user-attachments/assets/f03a4c82-9d41-4cee-b096-afa89f2530a6" />
+
+![WhatsApp Image 2024-12-18 at 00 24 57](https://github.com/user-attachments/assets/c6537fef-c0a5-4dfb-bed8-e31aacc12a41)
 
 <img width="1470" alt="Screenshot 2024-12-18 at 12 29 55 AM" src="https://github.com/user-attachments/assets/348dd027-c65e-4c2d-87e7-7c52dd5bfdf6" />
 
