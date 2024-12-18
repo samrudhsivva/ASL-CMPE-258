@@ -1,0 +1,219 @@
+import os
+import shutil
+import torch
+import torch.nn as nn
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms
+from timm import create_model
+from PIL import Image
+from sklearn.model_selection import train_test_split
+from tqdm import tqdm
+
+# -----------------------------------
+# 1. Dataset Splitter
+# -----------------------------------
+# Function to create training and validation splits from the dataset
+def create_train_val_split(dataset_path, train_dir="train", val_dir="val", val_ratio=0.2):
+    # Identify the nested folder containing class-specific directories
+    nested_train_path = os.path.join(dataset_path, "asl_alphabet_train", "asl_alphabet_train")
+    classes = sorted(os.listdir(nested_train_path))
+
+    # Define paths for training and validation directories
+    train_path = os.path.join(dataset_path, train_dir)
+    val_path = os.path.join(dataset_path, val_dir)
+
+    # Create directories for train and validation splits
+    os.makedirs(train_path, exist_ok=True)
+    os.makedirs(val_path, exist_ok=True)
+
+    # Iterate over each class folder and split images into train/val sets
+    for cls in classes:
+        cls_path = os.path.join(nested_train_path, cls)
+        if os.path.isdir(cls_path):
+            # Gather all image file paths for the current class
+            images = [os.path.join(cls_path, img) for img in os.listdir(cls_path) if img.endswith((".jpg", ".png", ".jpeg"))]
+            if len(images) == 0:
+                print(f"Skipping empty class folder: {cls}")
+                continue
+
+            # Split the images into training and validation sets
+            train_images, val_images = train_test_split(images, test_size=val_ratio, random_state=42)
+
+            # Create class-specific directories in train and val folders
+            os.makedirs(os.path.join(train_path, cls), exist_ok=True)
+            os.makedirs(os.path.join(val_path, cls), exist_ok=True)
+
+            # Copy images to respective directories
+            for img in train_images:
+                shutil.copy(img, os.path.join(train_path, cls))
+            for img in val_images:
+                shutil.copy(img, os.path.join(val_path, cls))
+
+    print(f"Train and validation splits created at: {train_path}, {val_path}")
+
+# Path to the dataset's root directory
+dataset_root = "/path/to/dataset"
+# Call the function to split the dataset into train and validation sets
+create_train_val_split(dataset_root)
+
+# -----------------------------------
+# 2. Dataset Class
+# -----------------------------------
+# Custom PyTorch dataset for loading ASL images and labels
+class ASLDataset(Dataset):
+    def __init__(self, root_dir, transform=None):
+        self.root_dir = root_dir
+        self.transform = transform
+        self.data = []
+        self.labels = []
+        self.classes = sorted(os.listdir(root_dir))
+        self.class_to_idx = {cls_name: idx for idx, cls_name in enumerate(self.classes)}
+
+        # Traverse the directory structure to gather data and labels
+        for cls_name in self.classes:
+            cls_path = os.path.join(root_dir, cls_name)
+            if os.path.isdir(cls_path):
+                for img_file in os.listdir(cls_path):
+                    self.data.append(os.path.join(cls_path, img_file))
+                    self.labels.append(self.class_to_idx[cls_name])
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        img_path = self.data[idx]
+        label = self.labels[idx]
+        image = Image.open(img_path).convert("RGB")
+        if self.transform:
+            image = self.transform(image)
+        return image, label
+
+# -----------------------------------
+# 3. Transformations and DataLoaders
+# -----------------------------------
+# Define image transformations for data augmentation and normalization
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.RandomHorizontalFlip(),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+])
+
+# Paths to training and validation directories
+train_path = os.path.join(dataset_root, "train")
+val_path = os.path.join(dataset_root, "val")
+
+# Create dataset instances for training and validation
+train_dataset = ASLDataset(root_dir=train_path, transform=transform)
+val_dataset = ASLDataset(root_dir=val_path, transform=transform)
+
+# Create data loaders for batch processing
+train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=16, shuffle=False)
+
+# -----------------------------------
+# 4. Model Definition
+# -----------------------------------
+# Custom ASL classifier model based on EfficientNet
+class ASLClassifier(nn.Module):
+    def __init__(self, num_classes):
+        super(ASLClassifier, self).__init__()
+        # Load EfficientNet model from timm library
+        self.base_model = create_model("efficientnet_b0", pretrained=True)
+        # Replace the classifier head to match the number of classes
+        self.base_model.classifier = nn.Linear(self.base_model.num_features, num_classes)
+
+    def forward(self, x):
+        return self.base_model(x)
+
+# Initialize the model with the number of classes in the dataset
+num_classes = len(train_dataset.classes)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = ASLClassifier(num_classes=num_classes).to(device)
+
+# -----------------------------------
+# 5. Training Loop
+# -----------------------------------
+# Define loss function and optimizer
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
+
+# Function to train the model
+def train_model(model, train_loader, val_loader, criterion, optimizer, device, num_epochs=5):
+    for epoch in range(num_epochs):
+        # Training phase
+        model.train()
+        train_loss = 0.0
+        correct = 0
+        total = 0
+        for images, labels in tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs} [Train]"):
+            images, labels = images.to(device), labels.to(device)
+            optimizer.zero_grad()
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+
+            train_loss += loss.item()
+            _, preds = outputs.max(1)
+            correct += preds.eq(labels).sum().item()
+            total += labels.size(0)
+
+        # Validation phase
+        model.eval()
+        val_loss = 0.0
+        val_correct = 0
+        val_total = 0
+        with torch.no_grad():
+            for images, labels in tqdm(val_loader, desc=f"Epoch {epoch+1}/{num_epochs} [Val]"):
+                images, labels = images.to(device), labels.to(device)
+                outputs = model(images)
+                loss = criterion(outputs, labels)
+
+                val_loss += loss.item()
+                _, preds = outputs.max(1)
+                val_correct += preds.eq(labels).sum().item()
+                val_total += labels.size(0)
+
+        print(f"Epoch {epoch+1}/{num_epochs}")
+        print(f"Train Loss: {train_loss/len(train_loader):.4f}, Train Accuracy: {100.0 * correct / total:.2f}%")
+        print(f"Val Loss: {val_loss/len(val_loader):.4f}, Val Accuracy: {100.0 * val_correct / val_total:.2f}%")
+
+# Train the model for one epoch
+train_model(model, train_loader, val_loader, criterion, optimizer, device, num_epochs=1)
+
+# -----------------------------------
+# 6. Save Model
+# -----------------------------------
+# Save the trained model to a file
+torch.save(model.state_dict(), "asl_classifier.pth")
+print("Model saved to asl_classifier.pth")
+
+# -----------------------------------
+# 7. Testing Code
+# -----------------------------------
+# Function to evaluate the model on a test dataset
+def test_model(model, test_loader, device):
+    model.eval()
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for images, labels in tqdm(test_loader, desc="Testing"):
+            images, labels = images.to(device), labels.to(device)
+            outputs = model(images)
+            _, preds = outputs.max(1)
+            correct += preds.eq(labels).sum().item()
+            total += labels.size(0)
+
+    accuracy = 100.0 * correct / total
+    print(f"Test Accuracy: {accuracy:.2f}%")
+
+# Create a test DataLoader
+# Using validation set as a test set for simplicity
+test_path = os.path.join(dataset_root, "val")
+test_dataset = ASLDataset(root_dir=test_path, transform=transform)
+test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
+
+# Run the test
+test_model(model, test_loader, device)
