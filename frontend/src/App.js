@@ -46,11 +46,17 @@ const handlePredict = async (image) => {
 const callOutAlphabet = (text) => {
     const voices = window.speechSynthesis.getVoices();
     const languageMap = {
-      en: "en-US",
-      es: "es-ES",
-      te: "te-IN", // Telugu (requires specific system setup for support)
-      hi: "hi-IN", // Hindi
-    };
+  en: "en-US", // English (United States)
+  es: "es-ES", // Spanish (Spain)
+  hi: "hi-IN", // Hindi (India)
+  te: "te-IN", // Telugu (India)
+  ja: "ja-JP", // Japanese (Japan)
+  "zh-cn": "zh-CN", // Chinese (Simplified)
+  "zh-tw": "zh-TW", // Chinese (Traditional)
+  fr: "fr-FR", // French (France)
+  de: "de-DE"  // German (Germany)
+};
+
 
     const voice = voices.find((v) => v.lang === languageMap[language]);
     speak({
