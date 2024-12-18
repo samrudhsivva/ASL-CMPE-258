@@ -141,8 +141,23 @@ The system integrates the following key components:
 
 ## References:
 
-- Kaggle ASL Alphabet Dataset: [https://www.kaggle.com/grassknoted/asl-alphabet](https://www.kaggle.com/grassknoted/asl-alphabet)
-- EfficientNet: [https://arxiv.org/abs/1905.11946](https://arxiv.org/abs/1905.11946)
-- React Documentation: [https://reactjs.org/](https://reactjs.org/)
-- TensorFlow Documentation: [https://www.tensorflow.org/](https://www.tensorflow.org/)
+References:
+
+Kaggle ASL Alphabet Dataset: https://www.kaggle.com/grassknoted/asl-alphabet
+
+EfficientNet: https://arxiv.org/abs/1905.11946
+
+React Documentation: https://reactjs.org/
+
+TensorFlow Documentation: https://www.tensorflow.org/
+
+Flask Documentation: https://flask.palletsprojects.com/
+
+PyTorch Documentation: https://pytorch.org/docs/stable/index.html
+
+Google Translate API: https://cloud.google.com/translate/docs
+
+pyttsx3 Documentation: https://pyttsx3.readthedocs.io/en/latest/
+
+FastAPI Documentation: https://fastapi.tiangolo.com/
 
